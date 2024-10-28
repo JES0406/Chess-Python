@@ -18,15 +18,15 @@ class Queen(Piece):
             steps = max(row_diff, col_diff)
             for step in range(1, steps):
                 if board[current_number + step * row_step - 1][current_col + step * col_step] is not None:
-                    return False  # Path is blocked
+                    return False, 'path blocked'  # Path is blocked
 
             # Check if target square is empty or contains an enemy piece
             target_piece = board[target_number - 1][target_col]
             if target_piece is None or target_piece.color != self.color:
-                return True
+                return True, 'all good'
 
         # Invalid move for the queen
-        return False
+        return False, 'invalid'
 
 
 

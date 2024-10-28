@@ -13,7 +13,7 @@ class Knight(Piece):
             target_piece = board[target_number - 1][target_col]
             # Knight can capture an opponent's piece or move to an empty square
             if target_piece is None or target_piece.color != self.color:
-                return True
+                return True, 'all good'
 
         # Invalid move for the knight
-        return False
+        return False, 'invalid'

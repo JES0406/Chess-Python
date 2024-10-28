@@ -15,7 +15,7 @@ class King(Piece):
                     
                     # Allow the move if the target square is empty or occupied by an enemy piece
                     if target_piece is None or target_piece.color != self.color:
-                        return True
+                        return True, 'all good'
 
             # Invalid move for the king
-            return False
+            return False, 'invalid'

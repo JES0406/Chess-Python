@@ -6,6 +6,7 @@ class Piece:
         self._pos = (None, None) # (letter, number)
         self._color = color
         self._type = _type
+        self._has_moved = False
 
     @property
     def image(self):
@@ -36,6 +37,14 @@ class Piece:
     def type(self):
         return self._type
 
+    @property
+    def has_moved(self):
+        return self._has_moved
+    
+    @has_moved.setter
+    def has_moved(self, value):
+        self._has_moved = value
+
     def move(self, target_position, board):
         """
         Moves the pawn to the target position if the move is valid.
@@ -43,8 +52,11 @@ class Piece:
         :param board: A 2D array or dictionary representing the chess board where pieces are stored.
         :return: Boolean indicating whether the move was successful.
         """
-        if self.is_move_valid(board, target_position):
+        valid = self.is_move_valid(target_position, board)
+        if valid[0]:
             self.pos = target_position
+            self.has_moved = True
+        return valid
 
     def is_move_valid(self, board, target_position)->None:
         raise NotImplementedError("This is an abstract class, the method must me overriden")
@@ -66,4 +78,7 @@ class Piece:
         col_diff = abs(target_col - current_col)
 
         return current_letter, current_number, target_letter, target_number, current_col, target_col, row_diff, col_diff
+    
+    def __str__(self) -> str:
+        return f"{self.type}: position: {self.pos}"
 
