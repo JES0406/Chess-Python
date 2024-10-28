@@ -1,14 +1,13 @@
-from Pieces.Piece import Piece
+from src.Pieces.Piece import Piece
 
 class Rook(Piece):
     def __init__(self, color) -> None:
         super().__init__(color, 'rook')
         self.image = self.get_image()
 
-    def move(self, target_position, board):
-        current_letter, current_number, target_letter, target_number,  current_col, target_col, row_diff, col_diff = self.get_crdinated(target_position)
+    def is_move_valid(self, board, target_position):
+        current_letter, current_number, target_letter, target_number,  current_col, target_col, row_diff, col_diff = self.get_coordinated(target_position)
 
-        # Rook moves horizontally or vertically
         if row_diff == 0 or col_diff == 0:
             # Determine movement direction
             row_step = 0 if row_diff == 0 else (1 if target_number > current_number else -1)
@@ -23,8 +22,7 @@ class Rook(Piece):
             # Check if target square is empty or contains an enemy piece
             target_piece = board[target_number - 1][target_col]
             if target_piece is None or target_piece.color != self.color:
-                self.pos = target_position
                 return True
 
         # Invalid move for the rook
-        return False
+        return False     

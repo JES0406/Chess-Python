@@ -36,14 +36,24 @@ class Piece:
     def type(self):
         return self._type
 
-    def move(self)->None:
+    def move(self, target_position, board):
+        """
+        Moves the pawn to the target position if the move is valid.
+        :param target_position: Tuple (letter, number) representing the target position on the board.
+        :param board: A 2D array or dictionary representing the chess board where pieces are stored.
+        :return: Boolean indicating whether the move was successful.
+        """
+        if self.is_move_valid(board, target_position):
+            self.pos = target_position
+
+    def is_move_valid(self, board, target_position)->None:
         raise NotImplementedError("This is an abstract class, the method must me overriden")
     
     def get_image(self):
         return path_of_piece.format(color = self.color, piece = self.type, size = piece_size)
     
 
-    def get_crdinated(self, target_position):
+    def get_coordinated(self, target_position):
         current_letter, current_number = self.pos
         target_letter, target_number = target_position
 
@@ -52,7 +62,7 @@ class Piece:
         target_col = ord(target_letter) - ord('a')
 
         # Calculate the differences in rows and columns
-        row_diff = abs(target_number - current_number)
+        row_diff = abs(int(target_number) - int(current_number))
         col_diff = abs(target_col - current_col)
 
         return current_letter, current_number, target_letter, target_number, current_col, target_col, row_diff, col_diff
