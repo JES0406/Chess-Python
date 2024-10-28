@@ -5,7 +5,7 @@ class Rook(Piece):
         super().__init__(color, 'rook')
         self.image = self.get_image()
 
-    def is_move_valid(self, target_position, board):
+    def is_move_valid(self, target_position, board, take):
         current_letter, current_number, target_letter, target_number,  current_col, target_col, row_diff, col_diff = self.get_coordinated(target_position)
 
         if row_diff == 0 or col_diff == 0:
@@ -22,6 +22,8 @@ class Rook(Piece):
             # Check if target square is empty or contains an enemy piece
             target_piece = board[target_number - 1][target_col]
             if target_piece is None or target_piece.color != self.color:
+                if not take:
+                    return False, 'Move not marked as take, perhaps you forgot about a the x?'
                 return True, 'all good'
 
         # Invalid move for the rook

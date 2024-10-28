@@ -5,7 +5,7 @@ class King(Piece):
         super().__init__(color, 'king')
         self.image = self.get_image()
 
-    def is_move_valid(self, target_position, board):
+    def is_move_valid(self, target_position, board, take):
             current_letter, current_number, target_letter, target_number,  current_col, target_col, row_diff, col_diff = self.get_coordinated(target_position)
             # Check if the target position is one square away in any direction
             if row_diff <= 1 and col_diff <= 1:
@@ -15,6 +15,8 @@ class King(Piece):
                     
                     # Allow the move if the target square is empty or occupied by an enemy piece
                     if target_piece is None or target_piece.color != self.color:
+                        if not take:
+                            return False, 'Move not marked as take, perhaps you forgot about a the x?'
                         return True, 'all good'
 
             # Invalid move for the king

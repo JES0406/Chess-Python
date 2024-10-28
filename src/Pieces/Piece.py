@@ -45,20 +45,20 @@ class Piece:
     def has_moved(self, value):
         self._has_moved = value
 
-    def move(self, target_position, board):
+    def move(self, target_position, board, take):
         """
         Moves the pawn to the target position if the move is valid.
         :param target_position: Tuple (letter, number) representing the target position on the board.
         :param board: A 2D array or dictionary representing the chess board where pieces are stored.
         :return: Boolean indicating whether the move was successful.
         """
-        valid = self.is_move_valid(target_position, board)
+        valid = self.is_move_valid(target_position, board, take)
         if valid[0]:
             self.pos = target_position
             self.has_moved = True
         return valid
 
-    def is_move_valid(self, board, target_position)->None:
+    def is_move_valid(self, board, target_position, take)->None:
         raise NotImplementedError("This is an abstract class, the method must me overriden")
     
     def get_image(self):

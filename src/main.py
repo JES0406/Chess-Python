@@ -14,7 +14,7 @@ def evaluate_move(board, notation, color):
     :return: A tuple (is_valid, message), where `is_valid` is a boolean indicating if the move is valid, and `message` provides feedback.
     """
     # Regular expressions for parsing different types of moves
-    piece_move = re.match(r"([KQRBN]?)([a-h]?[1-8]?)x?([a-h][1-8])([+#]?)", notation)
+    piece_move = re.match(r"([KQRBN]?)([a-h]?[1-8]?)(x?)([a-h][1-8])([+#]?)", notation)
     castling_move = re.match(r"O-O(-O)?", notation)
 
     # Handle castling
@@ -27,16 +27,15 @@ def evaluate_move(board, notation, color):
 
     # Handle piece or pawn moves
     if piece_move:
-        piece_symbol, disambiguation, target_square, check = piece_move.groups()
+        piece_symbol, disambiguation, take, target_square, check = piece_move.groups()
+        # print(piece_move.groups())
         target_square = (target_square[0], int(target_square[1]))
         
         # Determine piece type; if empty, it's a pawn move
         piece_type = "p" if piece_symbol == "" else piece_symbol.lower()
         piece_type = pieces[piece_type]
         # Find the piece based on the color, piece type, and target position
-        possible_pieces = board.find_pieces(color=color, piece_type=piece_type, target_square=target_square, disambiguation=disambiguation)
-        for p in possible_pieces:
-            print(p)
+        possible_pieces = board.find_pieces(color=color, piece_type=piece_type, target_square=target_square, disambiguation=disambiguation, take=take)
         if not possible_pieces:
             return False, f"No valid {piece_type} found for {color} that can move to {target_square}."
         if len(possible_pieces) > 1:
@@ -45,8 +44,8 @@ def evaluate_move(board, notation, color):
         # Validate the move for the found piece
         piece = possible_pieces[0]
         prev = piece.pos
-        if piece.move(target_square, board.board): # The move executes only if it is valid
-            print(f"Previous: {prev}, Objective: {target_square}, piece pos: {piece.pos}")
+        if piece.move(target_square, board.board, take=take): # The move executes only if it is valid
+            # print(f"Previous: {prev}, Objective: {target_square}, piece pos: {piece.pos}")
             board[prev] = None
             board[target_square] = piece
             return True, f"{color.capitalize()} {piece_type} moved to {target_square}{check}."

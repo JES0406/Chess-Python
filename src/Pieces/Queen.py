@@ -5,7 +5,7 @@ class Queen(Piece):
         super().__init__(color, 'queen')
         self.image = self.get_image()
 
-    def is_move_valid(self, target_position, board):
+    def is_move_valid(self, target_position, board, take):
         current_letter, current_number, target_letter, target_number,  current_col, target_col, row_diff, col_diff = self.get_coordinated(target_position)
 
         # Check if the move is in a straight line (like a rook) or a diagonal (like a bishop)
@@ -18,15 +18,17 @@ class Queen(Piece):
             steps = max(row_diff, col_diff)
             for step in range(1, steps):
                 if board[current_number + step * row_step - 1][current_col + step * col_step] is not None:
-                    return False, 'path blocked'  # Path is blocked
+                    return False, 'Path blocked'  # Path is blocked
 
             # Check if target square is empty or contains an enemy piece
             target_piece = board[target_number - 1][target_col]
             if target_piece is None or target_piece.color != self.color:
-                return True, 'all good'
+                if not take:
+                    return False, 'Move not marked as take, perhaps you forgot about a the x?'
+                return True, 'All good'
 
         # Invalid move for the queen
-        return False, 'invalid'
+        return False, 'Invalid move'
 
 
 

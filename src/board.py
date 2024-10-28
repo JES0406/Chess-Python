@@ -26,7 +26,7 @@ class Board:
             self.board[7][col] = piece_order[col]('b')  # Place main pieces on the eighth rank
             self.board[7][col].pos = (letters[col], 8)
 
-    def find_pieces(self, color, piece_type, target_square, disambiguation=None):
+    def find_pieces(self, color, piece_type, target_square, disambiguation=None, take = None):
         """
         Finds all pieces of a given type and color that could legally move to a target square.
         :param color: The color of the piece ('white' or 'black').
@@ -46,7 +46,7 @@ class Board:
                 if piece is None or piece.color != color or piece.type != piece_type:
                     continue
                 # Check if the piece can legally move to the target square
-                valid = piece.is_move_valid(target_square, self.board)
+                valid = piece.is_move_valid(target_square, self.board, take)
                 if valid[0]:
                     # If disambiguation is provided, check if it matches
                     if disambiguation:
@@ -125,7 +125,7 @@ class Board:
                 # Check if there’s a piece on this square
                 piece = self.board[row][col]
                 if piece is not None:
-                    print(f"Drawing {piece.type} at ({row}, {col}) - Expected position: {piece.pos}")
+                    # print(f"Drawing {piece.type} at ({row}, {col}) - Expected position: {piece.pos}")
                     piece_path = piece.image  # This should point to the correct image path for the piece
                     piece_image = pygame.image.load(piece_path)
                     piece_image = pygame.transform.scale(piece_image, (tile_size, tile_size))
@@ -140,5 +140,5 @@ class Board:
         return self.board[item[1]][ord(item[0]) - ord('a')]
     
     def __setitem__(self, key, value):
-        print("changes", key, value)
+        # print("changes", key, value)
         self.board[key[1]-1][ord(key[0]) - ord('a')-1] = value
