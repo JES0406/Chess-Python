@@ -90,6 +90,8 @@ if __name__ == "__main__":
     board = Board()
     board.initialize_board()
 
+    print(board[("a", 8)])
+
     move = ""
 
     thread = threading.Thread(target=move_execution)

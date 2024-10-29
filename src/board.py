@@ -14,17 +14,27 @@ class Board:
     def initialize_board(self):
         piece_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
         for col in range(board_size):
-            self.board[1][col] = Pawn('w')    # Place pawns on the second rank
-            self.board[1][col].pos = (letters[col], 2)
-            self.board[0][col] = piece_order[col]('w')  # Place main pieces on the first rank
-            self.board[0][col].pos = (letters[col], 1)
+            # Place white pawns on the second rank
+            pawn = Pawn('w')
+            pawn.pos = (letters[col], 2)
+            self[(letters[col], 2)] = pawn
+            
+            # Place white main pieces on the first rank
+            piece = piece_order[col]('w')
+            piece.pos = (letters[col], 1)
+            self[(letters[col], 1)] = piece
 
         # Place black pieces (top of the board)
         for col in range(board_size):
-            self.board[6][col] = Pawn('b')    # Place pawns on the seventh rank
-            self.board[6][col].pos = (letters[col], 7)
-            self.board[7][col] = piece_order[col]('b')  # Place main pieces on the eighth rank
-            self.board[7][col].pos = (letters[col], 8)
+            # Place black pawns on the seventh rank
+            pawn = Pawn('b')
+            pawn.pos = (letters[col], 7)
+            self[(letters[col], 7)] = pawn
+            
+            # Place black main pieces on the eighth rank
+            piece = piece_order[col]('b')
+            piece.pos = (letters[col], 8)
+            self[(letters[col], 8)] = piece
 
     def find_pieces(self, color, piece_type, target_square, disambiguation=None, take = None):
         """
@@ -41,7 +51,6 @@ class Board:
         for row in range(board_size):
             for col in range(board_size):
                 piece = self.board[row][col]
-                
                 # Skip empty squares or pieces of the wrong color/type
                 if piece is None or piece.color != color or piece.type != piece_type:
                     continue
@@ -137,8 +146,8 @@ class Board:
                 screen.blit(tile_image, (x_pos, y_pos))
 
     def __getitem__(self, item):
-        return self.board[item[1]][ord(item[0]) - ord('a')]
+        return self.board[item[1]-1][ord(item[0]) - ord('a')]
     
     def __setitem__(self, key, value):
         # print("changes", key, value)
-        self.board[key[1]-1][ord(key[0]) - ord('a')-1] = value
+        self.board[key[1]-1][ord(key[0]) - ord('a')] = value

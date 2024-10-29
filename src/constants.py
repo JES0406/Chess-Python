@@ -3,11 +3,11 @@ import pygame
 
 board_size = 8
 tile_size = 128
-theme = 'brown'
+theme = 'gray'
 
 
 letters = [chr(i) for i in range(97, 97 + board_size)]
-numbers = [i for i in range(1, board_size + 2)]
+numbers = [i for i in range(1, board_size+1)]
 
 path_of_piece = r"Visuals\{color}_{piece}_png_shadow_{size}px.png"
 piece_size = '128'
