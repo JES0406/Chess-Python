@@ -11,13 +11,7 @@ class King(Piece):
             if row_diff <= 1 and col_diff <= 1:
                 # Ensure the move is within the board boundaries
                 if 0 <= target_number - 1 < 8 and 0 <= target_col < 8:
-                    target_piece = board[target_number - 1][target_col]
-                    
-                    # Allow the move if the target square is empty or occupied by an enemy piece
-                    if target_piece is None or target_piece.color != self.color:
-                        if not take:
-                            return False, 'Move not marked as take, perhaps you forgot about a the x?'
-                        return True, 'all good'
+                    return self.taking_logic(board, target_position, take)
 
             # Invalid move for the king
             return False, 'invalid'

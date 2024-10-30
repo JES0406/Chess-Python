@@ -3,6 +3,7 @@ import pygame
 
 board_size = 8
 tile_size = 128
+margin = 25
 theme = 'gray'
 
 
@@ -25,3 +26,7 @@ pieces = {
     'r': 'rook',
     'p': 'pawn'
 }
+inverse_pieces = {v: k for k, v in pieces.items()}
+
+from src.Pieces.PieceCreator import PieceCreator
+piece_creator = PieceCreator()

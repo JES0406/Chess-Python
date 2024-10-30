@@ -1,42 +1,33 @@
 from typing import Any
-from src.constants import numbers, letters, tile_size, board_size, theme, font
+from src.constants import numbers, letters, tile_size, board_size, theme, font, margin, piece_creator
+from src.Pieces.King import King
+from src.Pieces.Rook import Rook
 import pygame
-from src.Pieces.Pieces import *
 
 class Board:
     def __init__(self) -> None:
         self._board = [[None for i in range(len(numbers))] for j in range(len(letters))]
+        self.last_pawn_move = None # Track the last pawn move for en passant
 
     @property
     def board(self):
         return self._board
     
     def initialize_board(self):
-        piece_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
+        piece_order = ["rook", "knight", "bishop", "queen", "king", "bishop", "knight", "rook"]
         for col in range(board_size):
-            # Place white pawns on the second rank
-            pawn = Pawn('w')
-            pawn.pos = (letters[col], 2)
-            self[(letters[col], 2)] = pawn
-            
-            # Place white main pieces on the first rank
-            piece = piece_order[col]('w')
-            piece.pos = (letters[col], 1)
-            self[(letters[col], 1)] = piece
+            for color, pawn_rank, main_rank in [('w', 2, 1), ('b', 7, 8)]:
+                # Place pawns
+                pawn = piece_creator.create_piece("pawn", color)
+                pawn.pos = (letters[col], pawn_rank)
+                self[(letters[col], pawn_rank)] = pawn
 
-        # Place black pieces (top of the board)
-        for col in range(board_size):
-            # Place black pawns on the seventh rank
-            pawn = Pawn('b')
-            pawn.pos = (letters[col], 7)
-            self[(letters[col], 7)] = pawn
-            
-            # Place black main pieces on the eighth rank
-            piece = piece_order[col]('b')
-            piece.pos = (letters[col], 8)
-            self[(letters[col], 8)] = piece
+                # Place main pieces
+                piece = piece_creator.create_piece(piece_order[col], color)
+                piece.pos = (letters[col], main_rank)
+                self[(letters[col], main_rank)] = piece
 
-    def find_pieces(self, color, piece_type, target_square, disambiguation=None, take = None):
+    def find_pieces(self, color, piece_type, target_square, disambiguation="", take = None):
         """
         Finds all pieces of a given type and color that could legally move to a target square.
         :param color: The color of the piece ('white' or 'black').
@@ -55,33 +46,55 @@ class Board:
                 if piece is None or piece.color != color or piece.type != piece_type:
                     continue
                 # Check if the piece can legally move to the target square
-                valid = piece.is_move_valid(target_square, self.board, take)
+                valid = piece.is_move_valid(target_square, self, take)
                 if valid[0]:
                     # If disambiguation is provided, check if it matches
                     if disambiguation:
-                        # If disambiguation is a file (e.g., 'Nbd2'), it should match the piece's current file
-                        if disambiguation in letters and piece.pos[0] != disambiguation:
+                        # Separate file and rank components if both are provided (e.g., "e2")
+                        dis_file = disambiguation[0] if disambiguation[0] in letters else ""
+                        dis_rank = disambiguation[1] if len(disambiguation) == 2 else disambiguation if disambiguation.isdigit() else ""
+
+                        # Check if disambiguation file matches the piece's current file
+                        if dis_file and piece.pos[0] != dis_file:
                             continue
-                        # If disambiguation is a rank (e.g., 'N2d2'), it should match the piece's current rank
-                        if disambiguation in numbers and str(piece.pos[1]) != disambiguation:
+
+                        # Check if disambiguation rank matches the piece's current rank
+                        if dis_rank and str(piece.pos[1]) != dis_rank:
                             continue
                     
                     # Add the piece to the list of possible pieces
                     possible_pieces.append(piece)
-                # else:
-                #     print(valid[1]) if piece.color != "w" else None
 
         return possible_pieces
     
+    def execute_castle(self, color, kingside):
+        # Set starting positions based on color
+        row = 1 if color == 'w' else 8
+        king_start = ('e', row)
+        king_end = ('g', row) if kingside else ('c', row)
+        rook_start = ('h', row) if kingside else ('a', row)
+        rook_end = ('f', row) if kingside else ('d', row)
+        
+        # Move the king to its castled position
+        self[king_end] = self[king_start]
+        self[king_start] = None  # Clear the king's starting position
+
+        # Move the rook to its castled position
+        self[rook_end] = self[rook_start]
+        self[rook_start] = None  # Clear the rook's starting position
+
+
     def is_castling_valid(self, color, kingside):
-        row = 0 if color == "w" else 7
+        row = 1 if color == "w" else 8
         king_col = 4
         rook_col = 7 if kingside else 0
         step = 1 if kingside else -1
+        king_file = chr(king_col + ord('a'))
+        rook_file = chr(rook_col + ord('a'))
 
         # Retrieve the king and rook
-        king = self.board[row][king_col]
-        rook = self.board[row][rook_col]
+        king = self[(king_file, row)]
+        rook = self[(rook_file, row)]
 
         # Check if the king and rook are in the correct positions and are of the correct color
         if not isinstance(king, King) or king.color != color or king.has_moved:
@@ -89,14 +102,16 @@ class Board:
         if not isinstance(rook, Rook) or rook.color != color or rook.has_moved:
             return False
 
-        # Check the path between the king and rook for any blocking pieces
+        # Check path between king and rook for any blocking pieces
         for col in range(king_col + step, rook_col, step):
-            if self.board[row][col] is not None:
+            position = (chr(col + ord('a')), row)  # Convert to chess notation
+            if self[position] is not None:
                 return False
 
         # Check that no square the king moves through (including starting and ending) is under attack
         for col in range(king_col, king_col + 2 * step, step):
-            if self.is_square_under_attack((row, col), color):
+            position = (chr(col + ord('a')), row)  # Convert to chess notation
+            if self.is_square_under_attack(position, color):
                 return False
 
         # If all conditions are satisfied, castling is valid
@@ -116,7 +131,7 @@ class Board:
             for col in range(8):
                 piece = self.board[row][col]
                 if piece is not None and piece.color == opponent_color:
-                    if self.is_move_valid(piece, square):
+                    if piece.is_move_valid(square, self, True)[0] or piece.is_move_valid(square, self, False)[0]:
                         return True
         return False
     
@@ -141,8 +156,8 @@ class Board:
                     tile_image.blit(piece_image, (0, 0))  # Overlay the piece image onto the tile
 
                 # Calculate the position on the screen
-                x_pos = col * tile_size + 25
-                y_pos = (7 - row) * tile_size + 25  # Adjust for bottom-to-top display
+                x_pos = col * tile_size + margin
+                y_pos = (7 - row) * tile_size + margin  # Adjust for bottom-to-top display
                 screen.blit(tile_image, (x_pos, y_pos))
 
     def __getitem__(self, item):
@@ -151,3 +166,15 @@ class Board:
     def __setitem__(self, key, value):
         # print("changes", key, value)
         self.board[key[1]-1][ord(key[0]) - ord('a')] = value
+
+    def items(self):
+        """
+        Returns an iterator of positions and their contents in chess notation.
+        """
+        for row in range(board_size):
+            for col in range(board_size):
+                piece = self.board[row][col]
+                # Convert matrix indices to chess notation
+                file = chr(col + ord('a'))
+                rank = row + 1
+                yield (file, rank), piece

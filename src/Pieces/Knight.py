@@ -10,14 +10,7 @@ class Knight(Piece):
 
         # Knight moves in an "L" shape: two squares in one direction and one in the other
         if (row_diff == 2 and col_diff == 1) or (row_diff == 1 and col_diff == 2):
-            target_piece = board[target_number - 1][target_col]
-            # Knight can capture an opponent's piece or move to an empty square
-            if target_piece is None:
-                return True, 'All good'
-            elif target_piece.color != self.color:
-                print("take in place")
-                if take == "":
-                    return False, 'Move not marked as take, perhaps you forgot about a the x?'
+            return self.taking_logic(board, target_position, take)
 
         # Invalid move for the knight
         return False, 'Invalid'

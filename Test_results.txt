@@ -1,0 +1,9 @@
+Pawns works.
+Rook works.
+Knights work.
+King shouldnt make iligal moves, I have to check that.
+Bishop works.
+Queen works.
+
+Check logic is missing, need to implement.
+Funny thing is that when clicking the wrong piece (color) it still works as intended

@@ -58,7 +58,7 @@ class Piece:
             self.has_moved = True
         return valid
 
-    def is_move_valid(self, board, target_position, take)->None:
+    def is_move_valid(self, target_position, board, take)->None:
         raise NotImplementedError("This is an abstract class, the method must me overriden")
     
     def get_image(self):
@@ -78,6 +78,19 @@ class Piece:
         col_diff = abs(target_col - current_col)
 
         return current_letter, current_number, target_letter, target_number, current_col, target_col, row_diff, col_diff
+
+    def taking_logic(self, board, target_position, take):
+        target_piece = board[target_position]
+        if target_piece is None:
+            if take:
+                return False, 'Move marked as take, but is not taking'
+            return True, 'All good'
+        elif not take:
+            return False, 'Move not marked as take, perhaps you forgot about a the x?'
+        elif target_piece.color != self.color:
+                return True, 'All good'
+        else:
+            return False, 'Invalid'
     
     def __str__(self) -> str:
         return f"{self.type}: position: {self.pos}"

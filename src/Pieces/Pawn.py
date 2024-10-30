@@ -10,25 +10,24 @@ class Pawn(Piece):
 
         direction = 1 if self.color == "w" else -1
 
-        if target_letter == current_letter and target_number == current_number + direction:
-            if board[target_number-1][target_col] is None:  # Ensure the square is empty
-                return True, 'all good'
-            else:
-                print(board[target_number][target_col])
+        one_step_pos = (current_letter, current_number + direction)
 
-        # First move, allow two squares forward
+        # One square forward
+        if target_letter == current_letter and target_number == current_number + direction:
+            if board[target_position] is None:  # Ensure the target square is empty
+                return True, 'One fowards'
+
+        # First move: allow two squares forward
         if (self.color == "w" and current_number == 2) or (self.color == "b" and current_number == 7):
             if target_letter == current_letter and target_number == current_number + 2 * direction:
-                if (board[current_number + direction - 1][target_col] is None and 
-                    board[target_number -1][target_col] is None):  # Both squares should be empty
-                    return True, 'all good'
+                if board[one_step_pos] is None and board[target_position] is None:  # Both squares should be empty
+                    return True, 'Two fowards'
 
         # Capture diagonally
-        if abs(ord(target_letter) - ord(current_letter)) == 1 and target_number == current_number + direction:
-            if board[target_number-1][target_col] is not None and board[target_number-1][target_col].color != self.color:
-                if not take:
-                    return False, 'Move not marked as take, perhaps you forgot about a the x?'
-                return True, 'all good'
+        if abs(ord(target_letter) - ord(current_letter)) == 1 and target_number == current_number + direction and take:
+            if board.last_pawn_move == (target_letter, target_number - direction): # En passant
+                return True, "En passant"
+            return self.taking_logic(board, target_position, take)
 
         # Invalid move
         return False, 'not valid'
