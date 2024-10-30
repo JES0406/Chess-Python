@@ -8,6 +8,7 @@ class Board:
     def __init__(self) -> None:
         self._board = [[None for i in range(len(numbers))] for j in range(len(letters))]
         self.last_pawn_move = None # Track the last pawn move for en passant
+        self.initialize_board()
 
     @property
     def board(self):
@@ -117,21 +118,24 @@ class Board:
         # If all conditions are satisfied, castling is valid
         return True
     
-    def is_square_under_attack(self, square, color):
+    def is_square_under_attack(self, square, attack_color):
         """
         Checks if a square is under attack by the opponent.
         :param square: Tuple (row, col) of the square to check.
         :param color: The color of the player making the check (used to identify opponent).
         :return: True if the square is under attack, False otherwise.
         """
-        opponent_color = "b" if color == "w" else "w"
 
         # Check if any opponent piece can move to the square
+        defending_color = "b" if attack_color == "w" else "w"
+        # Check if any opponent piece can legally move to the square
         for row in range(8):
             for col in range(8):
                 piece = self.board[row][col]
-                if piece is not None and piece.color == opponent_color:
-                    if piece.is_move_valid(square, self, True)[0] or piece.is_move_valid(square, self, False)[0]:
+                if piece is not None and piece.color == attack_color:
+                    # Check both capturing and non-capturing moves
+                    is_valid_capture = piece.is_move_valid(square, self, take=True)[0]
+                    if is_valid_capture or piece.is_move_valid(square, self, take=False)[0]:
                         return True
         return False
     
